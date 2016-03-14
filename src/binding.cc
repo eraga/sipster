@@ -227,6 +227,30 @@ void dumb_cb(uv_async_t* handle) {
 
         Local<Array> medias = Nan::New<Array>();
         CallInfo ci;
+
+//        Local<Array> devices = Nan::New<Array>();
+
+//        Local<Object> play_med_obj;
+//                    play_med_obj = Nan::New(SIPSTERMedia_constructor)
+//                                ->GetFunction()
+//                                ->NewInstance(0, NULL);
+//                    SIPSTERMedia* play_med =
+//                      Nan::ObjectWrap::Unwrap<SIPSTERMedia>(play_med_obj);
+//                    play_med->media = &Endpoint::instance().audDevManager().getPlaybackDevMedia();
+//
+//        Local<Object> capt_med_obj;
+//                  capt_med_obj = Nan::New(SIPSTERMedia_constructor)
+//                              ->GetFunction()
+//                              ->NewInstance(0, NULL);
+//                  SIPSTERMedia* capt_med =
+//                    Nan::ObjectWrap::Unwrap<SIPSTERMedia>(capt_med_obj);
+//                  capt_med->media = &Endpoint::instance().audDevManager().getCaptureDevMedia();
+
+//        Nan::Set(devices, 0, play_med_obj);
+//        Nan::Set(devices, 1, capt_med_obj);
+
+        AudioMedia *aud_med = NULL;
+
         try {
           ci = call->getInfo();
           AudioMedia* media = NULL;
@@ -242,6 +266,11 @@ void dumb_cb(uv_async_t* handle) {
                 Nan::ObjectWrap::Unwrap<SIPSTERMedia>(med_obj);
               med->media = media;
               med->dir = ci.media[i].dir;
+
+              aud_med = (AudioMedia *)call->getMedia(i);
+
+
+
               /*if (ci.media[i].status == PJSUA_CALL_MEDIA_ACTIVE) {
                 try {
                   MediaTransportInfo mti = call->getMedTransportInfo(i);
@@ -252,10 +281,25 @@ void dumb_cb(uv_async_t* handle) {
               Nan::Set(medias, m++, med_obj);
             }
           }
+
+        if (aud_med != NULL) {
+//            AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
+//            AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
+//            // This will connect the sound device/mic to the call audio media
+//            cap_med.startTransmit(*aud_med);
+//
+//            // And this will connect the call audio media to the sound device/speaker
+//            aud_med->startTransmit(play_med);
+
+          pjsua_conf_connect(aud_med->getPortId(), 0);
+          pjsua_conf_connect(0, aud_med->getPortId());
+        }
+
           if (medias->Length() > 0) {
             Local<Value> emit_argv[2] = {
               Nan::New(ev_CALLMEDIA_media_symbol),
               medias
+//              devices
             };
             if (call->emit && !call->persistent().IsEmpty())
               call->emit->Call(call->handle(), 2, emit_argv);
@@ -559,6 +603,8 @@ static NAN_METHOD(EPInit) {
       return Nan::ThrowError(errstr.c_str());
     }
   }
+
+
 
   Local<Value> val;
   if (info.Length() > 0 && info[0]->IsObject()) {
