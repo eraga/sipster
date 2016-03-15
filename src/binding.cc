@@ -118,8 +118,8 @@ public:
 };
 
 AudioMediaPlayer ring_player;
-AudioMedia& play_med;
-AudioMedia& cap_med;
+AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
+AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
 
 // start event processing-related definitions ==================================
 # if NAUV_UVVERSION < 0x000b17
@@ -615,7 +615,6 @@ static NAN_METHOD(EPInit) {
   try {
     ring_player.createPlayer("ring.wav", 0);
   } catch(Error& err) {
-    delete ring_player;
     string errstr = "ring_player->createPlayer() error: " + err.info();
     return Nan::ThrowError(errstr.c_str());
   }
