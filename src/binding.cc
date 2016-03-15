@@ -117,7 +117,7 @@ public:
   }
 };
 
-AudioMediaPlayer player;
+AudioMediaPlayer ring_player;
 AudioMedia& play_med;
 AudioMedia& cap_med;
 
@@ -193,7 +193,7 @@ void dumb_cb(uv_async_t* handle) {
             ev_name = Nan::New(ev_CALLSTATE_calling_symbol);
           break;
           case PJSIP_INV_STATE_INCOMING:
-            player.startTransmit(play_med);
+            ring_player.startTransmit(play_med);
             ev_name = Nan::New(ev_CALLSTATE_incoming_symbol);
           break;
           case PJSIP_INV_STATE_EARLY:
@@ -203,15 +203,15 @@ void dumb_cb(uv_async_t* handle) {
             ev_name = Nan::New(ev_CALLSTATE_connecting_symbol);
           break;
           case PJSIP_INV_STATE_CONFIRMED:
-            player.stopTransmit(play_med);
+            ring_player.stopTransmit(play_med);
             ev_name = Nan::New(ev_CALLSTATE_confirmed_symbol);
           break;
           case PJSIP_INV_STATE_DISCONNECTED:
-            player.stopTransmit(play_med);
+            ring_player.stopTransmit(play_med);
             ev_name = Nan::New(ev_CALLSTATE_disconnected_symbol);
           break;
           default:
-            player.stopTransmit(play_med);
+            ring_player.stopTransmit(play_med);
           break;
         }
         if (!ev_name.IsEmpty()) {
@@ -235,7 +235,8 @@ void dumb_cb(uv_async_t* handle) {
 
         Local<Array> medias = Nan::New<Array>();
         CallInfo ci;
-        player.stopTransmit(play_med);
+
+        ring_player.stopTransmit(play_med);
 //        Local<Array> devices = Nan::New<Array>();
 
 //        Local<Object> play_med_obj;
@@ -611,7 +612,13 @@ static NAN_METHOD(EPInit) {
 
   play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
   cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
-  player.createPlayer("file.wav");
+  try {
+    ring_player.createPlayer("ring.wav", 0);
+  } catch(Error& err) {
+    delete ring_player;
+    string errstr = "ring_player->createPlayer() error: " + err.info();
+    return Nan::ThrowError(errstr.c_str());
+  }
 
 
   Local<Value> val;
