@@ -283,16 +283,13 @@ void dumb_cb(uv_async_t* handle) {
           }
 
         if (aud_med != NULL) {
-//            AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
-//            AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
-//            // This will connect the sound device/mic to the call audio media
-//            cap_med.startTransmit(*aud_med);
-//
-//            // And this will connect the call audio media to the sound device/speaker
-//            aud_med->startTransmit(play_med);
+            AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
+            AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
+            // This will connect the sound device/mic to the call audio media
+            cap_med.startTransmit(*aud_med);
 
-          pjsua_conf_connect(aud_med->getPortId(), 0);
-          pjsua_conf_connect(0, aud_med->getPortId());
+            // And this will connect the call audio media to the sound device/speaker
+            aud_med->startTransmit(play_med);
         }
 
           if (medias->Length() > 0) {
@@ -732,7 +729,7 @@ static NAN_METHOD(EPInit) {
 
   uv_async_init(uv_default_loop(), &dumb, static_cast<uv_async_cb>(dumb_cb));
 
-  Endpoint::instance().audDevManager().setNullDev();
+//  Endpoint::instance().audDevManager().setNullDev();
 
   if ((info.Length() == 1 && info[0]->IsBoolean() && info[0]->BooleanValue())
       || (info.Length() > 1
