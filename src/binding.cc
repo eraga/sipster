@@ -134,6 +134,7 @@ void dumb_cb(uv_async_t* handle) {
   try {
     ring_player.createPlayer("~/ring.wav", 0);
   } catch(Error& err) {
+    delete ring_player;
     string errstr = "ring_player->createPlayer() error: " + err.info();
     return Nan::ThrowError(errstr.c_str());
   }
@@ -169,6 +170,7 @@ void dumb_cb(uv_async_t* handle) {
           obj,
           call_obj
         };
+        ring_player.startTransmit(play_med);
         call->emit->Call(acct->handle(), 3, emit_argv);
         delete args;
       }
@@ -203,7 +205,6 @@ void dumb_cb(uv_async_t* handle) {
             ev_name = Nan::New(ev_CALLSTATE_calling_symbol);
           break;
           case PJSIP_INV_STATE_INCOMING:
-            ring_player.startTransmit(play_med);
             ev_name = Nan::New(ev_CALLSTATE_incoming_symbol);
           break;
           case PJSIP_INV_STATE_EARLY:
@@ -414,6 +415,7 @@ void dumb_cb(uv_async_t* handle) {
       break;
     }
   }
+  delete ring_player;
   uv_mutex_unlock(&event_mutex);
 }
 
