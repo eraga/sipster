@@ -132,7 +132,7 @@ void dumb_cb(uv_async_t* handle) {
 
   AudioMediaPlayer ring_player;
   try {
-    ring_player.createPlayer("~/ring.wav", 0);
+    ring_player.createPlayer("/ring.wav", 0);
   } catch(Error& err) {
     delete ring_player;
     string errstr = "ring_player->createPlayer() error: " + err.info();
