@@ -117,6 +117,10 @@ public:
   }
 };
 
+AudioMediaPlayer player;
+AudioMedia& play_med;
+AudioMedia& cap_med;
+
 // start event processing-related definitions ==================================
 # if NAUV_UVVERSION < 0x000b17
 void dumb_cb(uv_async_t* handle, int status) {
@@ -189,6 +193,7 @@ void dumb_cb(uv_async_t* handle) {
             ev_name = Nan::New(ev_CALLSTATE_calling_symbol);
           break;
           case PJSIP_INV_STATE_INCOMING:
+            player.startTransmit(play_med);
             ev_name = Nan::New(ev_CALLSTATE_incoming_symbol);
           break;
           case PJSIP_INV_STATE_EARLY:
@@ -198,12 +203,15 @@ void dumb_cb(uv_async_t* handle) {
             ev_name = Nan::New(ev_CALLSTATE_connecting_symbol);
           break;
           case PJSIP_INV_STATE_CONFIRMED:
+            player.stopTransmit(play_med);
             ev_name = Nan::New(ev_CALLSTATE_confirmed_symbol);
           break;
           case PJSIP_INV_STATE_DISCONNECTED:
+            player.stopTransmit(play_med);
             ev_name = Nan::New(ev_CALLSTATE_disconnected_symbol);
           break;
           default:
+            player.stopTransmit(play_med);
           break;
         }
         if (!ev_name.IsEmpty()) {
@@ -227,7 +235,7 @@ void dumb_cb(uv_async_t* handle) {
 
         Local<Array> medias = Nan::New<Array>();
         CallInfo ci;
-
+        player.stopTransmit(play_med);
 //        Local<Array> devices = Nan::New<Array>();
 
 //        Local<Object> play_med_obj;
@@ -283,8 +291,8 @@ void dumb_cb(uv_async_t* handle) {
           }
 
         if (aud_med != NULL) {
-            AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
-            AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
+//            AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
+//            AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
             // This will connect the sound device/mic to the call audio media
             cap_med.startTransmit(*aud_med);
 
@@ -601,6 +609,9 @@ static NAN_METHOD(EPInit) {
     }
   }
 
+  play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
+  cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
+  player.createPlayer("file.wav");
 
 
   Local<Value> val;
