@@ -129,6 +129,16 @@ void dumb_cb(uv_async_t* handle, int status) {
 void dumb_cb(uv_async_t* handle) {
 # endif
   Nan::HandleScope scope;
+
+  AudioMediaPlayer ring_player;
+  try {
+    ring_player.createPlayer("~/ring.wav", 0);
+  } catch(Error& err) {
+    string errstr = "ring_player->createPlayer() error: " + err.info();
+    return Nan::ThrowError(errstr.c_str());
+  }
+
+
   while (true) {
     uv_mutex_lock(&event_mutex);
     if (event_queue.empty())
@@ -609,16 +619,6 @@ static NAN_METHOD(EPInit) {
       return Nan::ThrowError(errstr.c_str());
     }
   }
-
-  play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
-  cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
-  try {
-    ring_player.createPlayer("ring.wav", 0);
-  } catch(Error& err) {
-    string errstr = "ring_player->createPlayer() error: " + err.info();
-    return Nan::ThrowError(errstr.c_str());
-  }
-
 
   Local<Value> val;
   if (info.Length() > 0 && info[0]->IsObject()) {
