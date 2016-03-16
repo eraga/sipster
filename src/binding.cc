@@ -134,7 +134,6 @@ void dumb_cb(uv_async_t* handle) {
   try {
     ring_player.createPlayer("/ring.wav", 0);
   } catch(Error& err) {
-    delete ring_player;
     string errstr = "ring_player->createPlayer() error: " + err.info();
     return Nan::ThrowError(errstr.c_str());
   }
@@ -415,7 +414,6 @@ void dumb_cb(uv_async_t* handle) {
       break;
     }
   }
-  delete ring_player;
   uv_mutex_unlock(&event_mutex);
 }
 
