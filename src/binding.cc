@@ -117,7 +117,7 @@ public:
   }
 };
 
-//AudioMediaPlayer ring_player;
+AudioMediaPlayer ring_player;
 AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
 AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
 
@@ -129,14 +129,6 @@ void dumb_cb(uv_async_t* handle, int status) {
 void dumb_cb(uv_async_t* handle) {
 # endif
   Nan::HandleScope scope;
-
-  AudioMediaPlayer ring_player;
-  try {
-    ring_player.createPlayer("/ring.wav", 0);
-  } catch(Error& err) {
-    string errstr = "ring_player->createPlayer() error: " + err.info();
-    return Nan::ThrowError(errstr.c_str());
-  }
 
 
   while (true) {
@@ -781,7 +773,16 @@ static NAN_METHOD(EPStart) {
     string errstr = "libStart error: " + err.info();
     return Nan::ThrowError(errstr.c_str());
   }
-  info.GetReturnValue().SetUndefined();
+
+  try {
+    ring_player.createPlayer("/ring.wav", 0);
+  } catch(Error& err) {
+    string errstr = "ring_player->createPlayer() error: " + err.info();
+    return Nan::ThrowError(errstr.c_str());
+  }
+
+
+        info.GetReturnValue().SetUndefined();
 }
 
 static NAN_METHOD(EPGetConfig) {
