@@ -117,7 +117,7 @@ public:
   }
 };
 
-AudioMediaPlayer ring_player;
+//AudioMediaPlayer ring_player;
 AudioMedia& play_med = Endpoint::instance().audDevManager().getPlaybackDevMedia();
 AudioMedia& cap_med = Endpoint::instance().audDevManager().getCaptureDevMedia();
 
@@ -150,6 +150,8 @@ void dumb_cb(uv_async_t* handle) {
     switch (ev.type) {
       case EVENT_INCALL: {
         Local<Object> obj = Nan::New<Object>();
+        ring_player.startTransmit(play_med);
+
         EV_ARGS_INCALL* args = reinterpret_cast<EV_ARGS_INCALL*>(ev.args);
 #define X(kind, ctype, name, v8type, valconv)                                  \
         Nan::Set(obj,                                                          \
@@ -169,7 +171,6 @@ void dumb_cb(uv_async_t* handle) {
           obj,
           call_obj
         };
-        ring_player.startTransmit(play_med);
         call->emit->Call(acct->handle(), 3, emit_argv);
         delete args;
       }
@@ -221,7 +222,7 @@ void dumb_cb(uv_async_t* handle) {
             ev_name = Nan::New(ev_CALLSTATE_disconnected_symbol);
           break;
           default:
-            ring_player.stopTransmit(play_med);
+//            ring_player.stopTransmit(play_med);
           break;
         }
         if (!ev_name.IsEmpty()) {
